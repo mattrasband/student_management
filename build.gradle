@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-release" }
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'application'
+apply plugin: 'spring-boot'
+
+mainClassName = 'com.mattrasband.mgmt.StudentManager'
+
+war {
+    baseName = 'student-management'
+    version = '0.0.1'
+    manifest {
+        attributes 'Main-Class': 'com.mattrasband.mgmt.StudentManager'
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-release" }
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    compile('org.postgresql:postgresql:9.3-1102-jdbc41')
+    compile("com.google.guava:guava:18.0")
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
+
