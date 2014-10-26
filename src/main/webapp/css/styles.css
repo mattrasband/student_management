@@ -1,0 +1,85 @@
+* {
+    margin: 0 0;
+    padding: 0 0;
+}
+
+body {
+    background-color: #000;
+    background-image: url(../img/footer_lodyas.png);
+}
+
+footer {
+    margin: 10px auto;
+    width: 95%;
+    border-top: 1px solid #000;
+    text-align: center;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+#mainContainer {
+    width: 768px;
+    height: auto;
+    margin: 0 auto;
+    padding: 10px 0;
+    background-color: #fff;
+}
+
+#content {
+    margin: 0 auto;
+    width: 75%;
+}
+
+.row {
+    display: inline-block;
+    width: 100%;
+}
+
+.row.header {
+    border-bottom: 1px solid #000;
+    font-weight: bold;
+}
+
+.row input {
+    border: none;
+}
+
+.row span {
+    display: inline-block;
+}
+
+.studentEdit {
+    width: 15px;
+    text-align: center;
+}
+
+.studentFirst,
+.studentLast {
+    width: 100px;
+}
+
+.right {
+    float: right;
+}
+
+#search {
+    margin: 0 15px 0 0;
+}
+
+#noStudentAlert {
+    width: 100%;
+    text-align: center;
+    margin: 15px auto;
+}
+
+.modal {
+    display: block;
+}
+
+
+.unstyled {
+    border: none;
+    background: none;
+}
