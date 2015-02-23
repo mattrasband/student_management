@@ -50,7 +50,7 @@ public class StudentController {
     }
 
     @ResponseBody
-    @RequestMapping(method = {RequestMethod.PUT}, value = "/{studentId}")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{studentId}")
     public ResponseEntity<Student> updateStudent(@PathVariable("studentId") String studentId,
                                                  @RequestBody Student body) {
         LOG.debug(String.format("Updating student %s", studentId));
@@ -71,7 +71,7 @@ public class StudentController {
     }
 
     @ResponseBody
-    @RequestMapping(method = {RequestMethod.DELETE}, value = "/{studentId}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{studentId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteStudent(@PathVariable("studentId") String studentId) {
         if (studentRepo.getStudent(studentId) == null) {
@@ -82,7 +82,7 @@ public class StudentController {
     }
 
     @ResponseBody
-    @RequestMapping(method = {RequestMethod.GET}, value = "/{studentId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{studentId}")
     public ResponseEntity<Student> getStudent(@PathVariable("studentId") String studentId) {
         Student student = studentRepo.getStudent(studentId);
         if (student == null) {

@@ -1,20 +1,4 @@
 angular.module('studentApp', ['ui.bootstrap'])
-    // Create and handle the confirm dialog (uses JavaScript's
-    // built in rather than something pretty)
-    .factory("confirm", function($window, $q) {
-        // Define promise-based confirm() method.
-        function confirm(message) {
-            var defer = $q.defer();
-            if ($window.confirm(message)) {
-                defer.resolve(true);
-            } else {
-                defer.reject(false);
-            }
-
-            return defer.promise;
-        }
-        return confirm;
-    })
 
     // Create the student api, consumer for api routes
     .factory('studentApi', function($http, $window) {
@@ -47,11 +31,15 @@ angular.module('studentApp', ['ui.bootstrap'])
         };
     })
 
-    // Control a user input box for editing students
-    .controller('ModalController', function($scope, $modalInstance, student) {
+    // Control a pretty stylized modal
+    .controller('ModalController', function($scope, $modalInstance, student, title) {
         // Copy to avoid editing object in main module's student array.
-        $scope.student = {};
-        angular.copy(student, $scope.student);
+        $scope.student;
+        $scope.title = title;
+        if (student) {
+            $scope.student = {};
+            angular.copy(student, $scope.student);
+        }
 
         $scope.ok = function () {
             $modalInstance.close($scope.student);
@@ -63,7 +51,7 @@ angular.module('studentApp', ['ui.bootstrap'])
     })
 
     // CRUD for students
-    .controller('StudentController', function($scope, confirm, studentApi, $modal) {
+    .controller('StudentController', function($scope, studentApi, $modal) {
         $scope.students = [];
 
         $scope.showEditMenu = function($index) {
@@ -99,32 +87,51 @@ angular.module('studentApp', ['ui.bootstrap'])
 
         // Delete a student.
         $scope.delUser = function(student) {
-            confirm("Are you sure you want to delete '" + student.last + ", " + student.first + "'?")
-                .then(
-                    function(res) {
-                        studentApi.del(student.id)
-                            .success(function() {
-                                for (var i = 0; i < $scope.students.length; i++) {
-                                    if (student.id == $scope.students[i].id) {
-                                        $scope.students.splice(i, 1);
-                                        break;
-                                    }
-                                }
-                            })
-                            .error(function(data, status, headers, config) {
-                                console.error('Error deleting the student:' + data);
-                            });
-                    },
-                    function(res) {
-                        // This is highly unlikely to happen, but I've seen apps crash due to silly things
-                        // like this.
-                        try {
-                            console.debug('Cancelled user deletion: ' + JSON.stringify(student));
-                        } catch (e) {
-                            console.debug('Issue stringifying json: ' + e);
-                        }
+            var modalInstance = $modal.open({
+                template: [
+                    '<div>',
+                        '<div class="modal-header"><h3 class="modal-title">{{title}}</h3></div>',
+                        '<div class="modal-footer">',
+                            '<button class="btn btn-primary" ng-click="ok()">OK</button>',
+                            '<button class="btn btn-warning" ng-click="cancel()">Cancel</button>',
+                        '</div>',
+                    '</div>'].join(''),
+                controller: function($scope, $modalInstance, title) {
+                    $scope.title = title;
+                    $scope.ok = function() {
+                        $modalInstance.close();
+                    };
+                    $scope.cancel = function() {
+                        $modalInstance.dismiss();
+                    };
+                },
+                size: 'sm',
+                resolve: {
+                    title: function() {
+                        return "Are you sure?";
                     }
-                );
+                }
+            });
+
+            modalInstance.result.then(
+                function() {
+                    studentApi.del(student.id)
+                        .success(function() {
+                            for (var i = 0; i < $scope.students.length; i++) {
+                                if (student.id == $scope.students[i].id) {
+                                    $scope.students.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            console.error('Error deleting the student:' + data);
+                        });
+                },
+                function() {
+                    console.debug("Cancelled student delete: " + student.id);
+                }
+            );
         };
 
         // Update a student
@@ -136,6 +143,9 @@ angular.module('studentApp', ['ui.bootstrap'])
                 resolve: {
                     student: function() {
                         return student;
+                    },
+                    title: function() {
+                        return "Edit Student";
                     }
                 }
             });

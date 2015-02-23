@@ -3,11 +3,20 @@ package com.mattrasband.mgmt.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Student {
+    private String id;
     private String first;
     private String last;
-    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getFirst() {
         return first;
@@ -23,14 +32,6 @@ public class Student {
 
     public void setLast(String last) {
         this.last = last;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override

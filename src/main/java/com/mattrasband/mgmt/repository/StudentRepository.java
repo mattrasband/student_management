@@ -25,8 +25,12 @@ public class StudentRepository {
      */
     public StudentRepository() {
         try {
+            Class.forName("org.postgresql.Driver");
             conn = DriverManager.getConnection(DBCONN, ServiceProperties.getDbUser(), ServiceProperties.getDbPass());
             init();
+        } catch (ClassNotFoundException e) {
+            LOG.error("Unable to load database driver.");
+            throw new RepositoryException("Unable to load database driver.", e);
         } catch (SQLException e) {
             LOG.error("Unable to connect to the database", e);
             throw new RepositoryException("Unable to connect to the database.", e);

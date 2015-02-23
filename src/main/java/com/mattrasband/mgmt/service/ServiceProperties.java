@@ -5,7 +5,7 @@ package com.mattrasband.mgmt.service;
  */
 public enum ServiceProperties {
     DB_HOST("localhost"),
-    DB_DATABASE("postgres"),
+    DB_DATABASE("students"),
     DB_USER(null),
     DB_PASS(null);
 
