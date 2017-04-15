@@ -2,23 +2,12 @@ package com.mattrasband.mgmt;
 
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@ComponentScan
-@Configuration
-@EnableAutoConfiguration
-public class StudentManager extends SpringBootServletInitializer {
+@SpringBootApplication
+public class StudentManager {
     public static void main(String[] args) {
         SpringApplication.run(StudentManager.class, args);
-    }
-
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(StudentManager.class);
     }
 }
 

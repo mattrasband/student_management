@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
     }
 }
 
@@ -14,7 +14,7 @@ apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'application'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 mainClassName = 'com.mattrasband.mgmt.StudentManager'
 
@@ -35,9 +35,22 @@ repositories {
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-    compile('org.postgresql:postgresql:9.3-1102-jdbc41')
-    compile("com.google.guava:guava:18.0")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    // If you wanted a real database, you would define the props in
+    // application.yml for the database info and uncomment these. On boot
+    // this will auto apply the migrations at src/main/resources/db/migrations/*
+    // for you (flyway)
+//    compile("org.flywaydb:flyway-core")
+//    compile("org.postgresql:postgresql")
+
+    // This is just to make runtime really simple, it's an embedded
+    // in-memory database. Data will be lost across runs.
+    runtime("org.hsqldb:hsqldb")
+
+    compile("com.google.guava:guava:21.0")
+
+    providedCompile("org.projectlombok:lombok")
 }
 
 task wrapper(type: Wrapper) {

@@ -1,104 +1,73 @@
 package com.mattrasband.mgmt.controller;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.mattrasband.mgmt.exception.BadRequestException;
 import com.mattrasband.mgmt.exception.NotFoundException;
-import com.mattrasband.mgmt.exception.RepositoryException;
-import com.mattrasband.mgmt.model.Student;
+import com.mattrasband.mgmt.model.dao.Student;
 import com.mattrasband.mgmt.repository.StudentRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import javax.validation.Valid;
 
 
 @RestController
 @RequestMapping(value = "/api/students", produces = MediaType.APPLICATION_JSON_VALUE)
+@Slf4j
 public class StudentController {
-    private static final Logger LOG = LoggerFactory.getLogger(StudentController.class);
+    private final StudentRepository studentRepository;
 
     @Autowired
-    private StudentRepository studentRepo;
-
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.POST, value = "")
-    public ResponseEntity<Student> createStudent(@RequestBody Student body) {
-        if (Strings.isNullOrEmpty(body.getFirst()) || Strings.isNullOrEmpty(body.getLast())) {
-            LOG.warn("Bad creation request: " + body.toString());
-            throw new BadRequestException("Invalid/Missing fields");
-        }
-
-        // Users cannot provide their own ID.
-        body.setId(UUID.randomUUID().toString());
-        studentRepo.addStudent(body);
-        return new ResponseEntity<>(body, HttpStatus.CREATED);
+    StudentController(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
     }
 
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.GET, value = "")
-    public ResponseEntity<List<Student>> getStudents() {
-        return new ResponseEntity<>(studentRepo.getStudents(), HttpStatus.OK);
+    @PostMapping("")
+    public Student createStudent(@RequestBody @Valid Student student) {
+        return this.studentRepository.save(student);
     }
 
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.PUT, value = "/{studentId}")
-    public ResponseEntity<Student> updateStudent(@PathVariable("studentId") String studentId,
-                                                 @RequestBody Student body) {
-        LOG.debug(String.format("Updating student %s", studentId));
-
-        if (studentRepo.getStudent(studentId) == null) {
-            throw new NotFoundException(String.format("Student '%s' not found.", studentId));
-        }
-
-        if (Strings.isNullOrEmpty(body.getLast()) || Strings.isNullOrEmpty(body.getFirst())) {
-            throw new BadRequestException("Invalid/Missing fields in the request.");
-        }
-
-        // IDs are not editable.
-        body.setId(studentId);
-
-        studentRepo.updateStudent(studentId, body);
-        return new ResponseEntity<>(body, HttpStatus.OK);
+    @GetMapping("")
+    public Iterable<Student> getStudents() {
+        return this.studentRepository.findAll();
     }
 
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{studentId}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteStudent(@PathVariable("studentId") String studentId) {
-        if (studentRepo.getStudent(studentId) == null) {
-            throw new NotFoundException(String.format("Student '%s' not found.", studentId));
+    @PutMapping("/{student}")
+    public Student updateStudent(@PathVariable("student") Student existingStudent,
+                                                                                @RequestBody @Valid Student update) {
+        if (existingStudent == null) {
+            log.debug("Attempt to update a non-existing student, bailing.");
+            throw new NotFoundException("Student not found.");
         }
 
-        studentRepo.deleteStudent(studentId);
+        log.debug("Updating student {}", existingStudent.getId());
+
+        existingStudent.setFirst(update.getFirst());
+        existingStudent.setLast(update.getLast());
+
+        return this.studentRepository.save(existingStudent);
     }
 
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.GET, value = "/{studentId}")
-    public ResponseEntity<Student> getStudent(@PathVariable("studentId") String studentId) {
-        Student student = studentRepo.getStudent(studentId);
+    @DeleteMapping("/{student}")
+    public void deleteStudent(@PathVariable("student") Student student) {
         if (student == null) {
-            throw new NotFoundException(String.format("Student '%s' not found.", studentId));
+            throw new NotFoundException("Not Found");
         }
-
-        return new ResponseEntity<>(student, HttpStatus.OK);
+        this.studentRepository.delete(student);
     }
 
-    @ExceptionHandler(RepositoryException.class)
-    public ResponseEntity<Object> handleSqlError(HttpServletRequest req, Exception e) {
-        LOG.error(String.format("SQL Error: %s - %s", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
-        Map<String, String> reply = ImmutableMap.<String, String>builder()
-                .put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                .put("message", e.getMessage())
-                .build();
-        return new ResponseEntity<>(reply, HttpStatus.INTERNAL_SERVER_ERROR);
+    @GetMapping("/{student}")
+    public Student getStudent(@PathVariable("student") Student student) {
+        if (student == null) {
+            throw new NotFoundException("Not Found.");
+        }
+        return student;
     }
 }
